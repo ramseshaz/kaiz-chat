@@ -1,4 +1,4 @@
-# PRD · <Nombre de tu producto>
+# PRD · <kaiz chat>
 
 > Documento de requisitos del producto (Product Requirements Document).
 > Complétalo en el Sprint 0 (historia H0.3) y pide la aprobación del profesor en un Issue.
@@ -14,46 +14,53 @@
 
 ## 1. Problema
 
-¿Qué problema real resuelve y a quién le duele? (3 a 5 líneas)
+¿Qué problema real resuelve y a quién le duele? 
+En grupos de estudio y equipos pequeños, las conversaciones de distintos temas se mezclan en un solo chat desordenado y, cuando la conexión a internet falla de forma intermitente, los mensajes redactados se pierden o no se envían en orden.
 
 ## 2. Usuarios
 
-- **Usuario principal:** quién es, qué necesita, desde qué dispositivo entra.
-- **Usuario secundario:**
+Usuario principal (participante conectado): Persona que inicia sesión desde su computadora o teléfono para conversar en tiempo real en los canales temáticos y recibir notificaciones de mensajes nuevos.
 
+Usuario secundario (participante en movilidad / con red inestable): Persona que accede desde zonas con señal intermitente y necesita redactar mensajes sin conexión para que la cola offline los envíe automáticamente en orden al reconectarse.
 ## 3. Objetivo y métrica de éxito
 
-Ejemplo: «Un bodeguero registra una venta en menos de 10 segundos».
+Un usuario conectado envía un mensaje en un canal temático y los demás participantes lo reciben en menos de 1 segundo vía WebSocket; si el usuario pierde conexión, el mensaje queda guardado en cola local y se entrega automáticamente en orden al reconectarse sin pérdida de datos.
 
 ## 4. Alcance del MVP
 
-Entre 5 y 8 funcionalidades que SÍ entran este semestre.
-
-1.
-2.
-3.
+1. Registro e inicio de sesión básico de usuarios.
+2. Visualización y selección de canales de texto temáticos (estilo Discord: barra lateral de canales y panel central de chat).
+3. Envío y lectura de mensajes en tiempo real mediante WebSockets sin recargar la página.
+4. Persistencia de historial de mensajes en PostgreSQL ordenado cronológicamente por canal.
+5. Cola de mensajes sin conexión (FIFO) en el navegador para redactar offline y sincronizar automáticamente al volver la red.
+6. Notificaciones visuales/sonoras y contador de mensajes no leídos por canal.
 
 ### Funcionalidades → carpetas de `src/` (screaming architecture)
 
-Cada funcionalidad del alcance será una carpeta en `src/`. Nómbralas en inglés y en plural.
-
 | Funcionalidad | Carpeta |
 | --- | --- |
-| Ejemplo: ventas | `src/sales` |
-| | |
+| Usuarios y sesiones | `src/users` |
+| Canales de chat | `src/channels` |
+| Mensajes e historial | `src/messages` |
+| Conexiones en tiempo real (WebSocket) | `src/websockets` |
+| Cola sin conexión y notificaciones | `src/notification
+
 
 ## 5. Fuera de alcance
 
-Lo que NO vas a construir.
+- Creación de múltiples servidores personalizados ni jerarquías complejas de roles o permisos.
+- Llamadas de voz, videollamadas WebRTC o transmisión de pantalla.
+- Subida de archivos pesados, imágenes o integración de bots externos.
 
--
 
 ## 6. Requisitos funcionales
-
 | ID | Requisito | Prioridad (alta, media, baja) |
 | --- | --- | --- |
-| RF-01 | | |
-| RF-02 | | |
+| RF-01 | El usuario puede registrarse e iniciar sesión con su nombre de usuario y contraseña. | Alta |
+| RF-02 | El usuario puede navegar entre canales de texto predefinidos y ver el historial de mensajes. | Alta |
+| RF-03 | Los mensajes enviados en un canal se transmiten al instante a los usuarios conectados mediante WebSocket. | Alta |
+| RF-04 | Si se pierde la conexión WebSocket, los mensajes enviados se guardan en una cola FIFO local y se envían automáticamente al reconectarse. | Alta |
+| RF-05 | El sistema muestra un contador de mensajes no leídos en canales inactivos y lanza una notificación del navegador al recibir mensajes nuevos. | Media |
 
 ## 7. Requisitos no funcionales
 
@@ -64,30 +71,39 @@ Lo que NO vas a construir.
 
 ## 8. Modelo de datos
 
-Diagrama entidad-relación y tablas PostgreSQL con tipos, claves y restricciones.
-GitHub dibuja diagramas Mermaid; edita este ejemplo:
-
 ```mermaid
 erDiagram
-  CLIENTE ||--o{ PEDIDO : hace
-  PEDIDO ||--|{ LINEA_PEDIDO : contiene
-  PRODUCTO ||--o{ LINEA_PEDIDO : aparece_en
-  CLIENTE {
+  USERS ||--o{ MESSAGES : envia
+  CHANNELS ||--o{ MESSAGES : contiene
+  USERS {
     int id PK
-    text nombre
-    text telefono
+    text username UK
+    text password_hash
+    timestamptz created_at
   }
-  PEDIDO {
+  CHANNELS {
     int id PK
-    int cliente_id FK
-    timestamptz creado_en
+    text name UK
+    text description
+    timestamptz created_at
   }
-```
+  MESSAGES {
+    int id PK
+    int channel_id FK
+    int user_id FK
+    text content
+    timestamptz created_at
+  }
 
 ## 9. Reto técnico distintivo
 
-El que te tocó en el catálogo y cómo piensas resolverlo.
+Chat en tiempo real (WebSocket) + cola de mensajes sin conexión + notificaciones:
+
+- WebSocket: Servidor en Node.js que agrupa usuarios por canal y difunde cada mensaje nuevo en vivo apenas se guarda en PostgreSQL.
+- Cola offline (FIFO): Arreglo en el navegador (`localStorage`) que encola mensajes escritos sin red con estado *Pendiente* y los envía en orden al reconectarse.
+- Notificaciones: Alertas del navegador (`Notification` API) e insignias numéricas cuando llegan mensajes a canales inactivos.
 
 ## 10. Riesgos y preguntas abiertas
-
--
+- Mensajes duplicados al reconectar: Se evitarán enviando un ID único por mensaje (`client_msg_id`) generado en el cliente.
+- Bloqueo de notificaciones del navegador: Si el usuario rechaza el permiso, seguirá viendo el contador visual de mensajes no leídos en la barra de canales.
+- Pregunta abierta: ¿Se usarán 3 canales fijos creados desde `db/seed` (`#general`, `#estudio`, `#off-topic`) o se permitirá crear canales nuevos? (Para el MVP se iniciará con canales predefinidos).

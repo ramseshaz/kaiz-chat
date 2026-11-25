@@ -9,7 +9,9 @@ está organizado el proyecto y qué reglas sigue.
 - Proyecto académico de **Lenguaje de Programación** (5.º semestre, Ingeniería de Sistemas).
 - La persona que programa es **estudiante**: está aprendiendo. Tu rol es enseñar y revisar, no
   resolverle la materia.
-- Producto: <!-- el alumno describe aquí su producto en 2 líneas -->
+- Producto:  Kaiz Chat es una aplicación web de chat en tiempo real con interfaz inspirada en Discord (lista de canales a la izquierda y área de conversación a la derecha). Permite a los usuarios registrarse, iniciar sesión y conversar al instante en canales de texto mediante WebSockets.
+
+Para evitar la pérdida de mensajes ante fallos de red, el cliente incorpora una cola de mensajes sin conexión (FIFO) que guarda localmente los mensajes escritos offline y los envía automáticamente en orden al recuperar la conexión, además de un sistema de notificaciones y contadores de mensajes no leídos por canal.
 
 ## Reglas obligatorias
 
