@@ -1,7 +1,7 @@
-# Mi producto
+# kaiz chat
 
-> **Alumno:** cambia este título por el nombre de tu producto y esta línea por una frase que lo explique.
-> Proyecto n.º __ del catálogo · Sitio de referencia: __ · [PRD](docs/PRD.md) · URL publicada: __
+> > Plataforma de mensajería y comunicación en tiempo real.
+> Proyecto n.º 35 del catálogo · Sitio de referencia: Discord · [PRD](docs/PRD.md) · URL publicada: __
 
 Plantilla del proyecto de **Lenguaje de Programación · 2026**.
 La guía completa de la actividad está en el repositorio del curso:

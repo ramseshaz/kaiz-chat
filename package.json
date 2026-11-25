@@ -1,7 +1,7 @@
 {
-  "name": "mi-producto",
+  "name": "kaiz-chat",
   "version": "0.1.0",
-  "description": "Proyecto de Lenguaje de Programación · cambia este texto por la descripción de tu producto",
+  "description": "> Plataforma de mensajería y comunicación en tiempo real.",
   "private": true,
   "type": "module",
   "engines": {
